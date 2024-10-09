@@ -3,15 +3,17 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from grid import Grid
 from camera import Camera
 from controlador_entrada import ControladorEntrada
+from a_estrela import AEstrela
 
 class Renderizador3D:
-    def __init__(self, grid: Grid, caminho: List[Tuple[int, int, int]]):
+    def __init__(self, grid: Grid, caminho: List[Tuple[int, int, int]], nos_expandidos: Set[Tuple[int, int, int]]):
         self.grid = grid
         self.caminho = caminho
+        self.nos_expandidos = nos_expandidos
         self.largura_tela = 800
         self.altura_tela = 600
         self.inicializar_pygame()
@@ -70,13 +72,23 @@ class Renderizador3D:
 
     def desenhar_caminho(self):
         glColor3f(0.0, 1.0, 0.0)  # Verde para o caminho
-        glLineWidth(2)
+        glLineWidth(3)
         glBegin(GL_LINE_STRIP)
         for posicao in self.caminho:
             x, y, z = posicao
             glVertex3f(x + 0.5, y + 0.5, z + 0.5)
         glEnd()
         glLineWidth(1)
+
+    def desenhar_nos_expandidos(self):
+        glColor3f(1.0, 0.0, 1.0)  # Rosa para os nós expandidos
+        glPointSize(2)
+        glBegin(GL_POINTS)
+        for posicao in self.nos_expandidos:
+            x, y, z = posicao
+            glVertex3f(x + 0.5, y + 0.5, z + 0.5)
+        glEnd()
+        glPointSize(1)
 
     def desenhar_ponto(self, posicao: Tuple[int, int, int], cor: Tuple[float, float, float]):
         glColor3f(*cor)
@@ -122,7 +134,7 @@ class Renderizador3D:
         glEnd()
 
     def desenhar_obstaculos(self):
-        glColor3f(1.0, 0.0, 0.0)  # Vermelho para os obstáculos
+        glColor4f(1.0, 0.0, 0.0, 0.5)  # Vermelho semi-transparente para os obstáculos
         for posicao in self.grid.obstaculos:
             glPushMatrix()
             x, y, z = posicao
@@ -144,6 +156,7 @@ class Renderizador3D:
             )
 
             self.desenhar_grid()
+            self.desenhar_nos_expandidos()
             self.desenhar_caminho()
             self.desenhar_obstaculos()
 

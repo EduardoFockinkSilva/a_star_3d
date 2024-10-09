@@ -1,5 +1,5 @@
 # a_estrela.py
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Dict
 import heapq
 from no import No
 from grid import Grid
@@ -7,6 +7,7 @@ from grid import Grid
 class AEstrela:
     def __init__(self, grid: Grid):
         self.grid = grid
+        self.nos_expandidos: Set[Tuple[int, int, int]] = set()  # Para armazenar os nós visitados
 
     def heuristica(self, posicao_atual: Tuple[int, int, int], posicao_fim: Tuple[int, int, int]) -> float:
         # Distância Euclidiana
@@ -36,12 +37,12 @@ class AEstrela:
 
         lista_aberta: List[No] = []
         conjunto_fechado: Set[Tuple[int, int, int]] = set()
-
         heapq.heappush(lista_aberta, no_inicio)
 
         while lista_aberta:
             no_atual = heapq.heappop(lista_aberta)
             conjunto_fechado.add(no_atual.posicao)
+            self.nos_expandidos.add(no_atual.posicao)
 
             if no_atual == no_fim:
                 print("[AEstrela] Caminho encontrado!")
