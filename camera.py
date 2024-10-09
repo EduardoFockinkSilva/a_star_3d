@@ -1,85 +1,98 @@
 # camera.py
-from typing import List
+import numpy as np
 import math
 
 class Camera:
-    def __init__(self, posicao: List[float], olhar_para: List[float], cima: List[float]):
-        self.posicao = posicao      # Posição da câmera [x, y, z]
-        self.olhar_para = olhar_para  # Ponto para onde a câmera está olhando [x, y, z]
-        self.cima = cima            # Vetor "up" da câmera [x, y, z]
-        self.velocidade = 0.3       # Velocidade de movimento da câmera
-        self.sensibilidade = 1.5    # Sensibilidade da rotação
-        self.yaw = -90.0            # Rotação em torno do eixo Y
-        self.pitch = 0.0            # Rotação em torno do eixo X
+    def __init__(self, posicao, olhar_para, cima):
+        self.posicao = np.array(posicao, dtype=np.float32)
+        self.olhar_para = np.array(olhar_para, dtype=np.float32)
+        self.cima = np.array(cima, dtype=np.float32)
+        self.velocidade = 0.5
+        self.sensibilidade = 1.0
+        self.yaw = -90.0
+        self.pitch = 0.0
         self.atualizar_vetor_direcao()
 
     def atualizar_vetor_direcao(self):
-        # Calcula o vetor direção baseado nos ângulos yaw e pitch
         rad_yaw = math.radians(self.yaw)
         rad_pitch = math.radians(self.pitch)
-        direcao_x = math.cos(rad_pitch) * math.cos(rad_yaw)
+        direcao_x = math.cos(rad_yaw) * math.cos(rad_pitch)
         direcao_y = math.sin(rad_pitch)
-        direcao_z = math.cos(rad_pitch) * math.sin(rad_yaw)
-        self.direcao = [direcao_x, direcao_y, direcao_z]
-        # Normaliza o vetor direção
-        magnitude = math.sqrt(sum([d ** 2 for d in self.direcao]))
-        self.direcao = [d / magnitude for d in self.direcao]
-        # Atualiza o ponto para onde a câmera está olhando
-        self.olhar_para = [
-            self.posicao[0] + self.direcao[0],
-            self.posicao[1] + self.direcao[1],
-            self.posicao[2] + self.direcao[2]
-        ]
+        direcao_z = math.sin(rad_yaw) * math.cos(rad_pitch)
+        self.direcao = np.array([direcao_x, direcao_y, direcao_z], dtype=np.float32)
+        self.direcao = self.direcao / np.linalg.norm(self.direcao)
+        self.olhar_para = self.posicao + self.direcao
 
-    def mover(self, direcao: str):
+    def mover(self, direcao):
         if direcao == 'frente':
-            for i in range(3):
-                self.posicao[i] += self.direcao[i] * self.velocidade
+            self.posicao += self.direcao * self.velocidade
         elif direcao == 'tras':
-            for i in range(3):
-                self.posicao[i] -= self.direcao[i] * self.velocidade
+            self.posicao -= self.direcao * self.velocidade
         elif direcao == 'esquerda':
-            # Produto vetorial entre vetor direção e vetor cima
-            lateral = [
-                self.direcao[1]*self.cima[2] - self.direcao[2]*self.cima[1],
-                self.direcao[2]*self.cima[0] - self.direcao[0]*self.cima[2],
-                self.direcao[0]*self.cima[1] - self.direcao[1]*self.cima[0]
-            ]
-            magnitude = math.sqrt(sum([l ** 2 for l in lateral]))
-            if magnitude != 0:
-                lateral = [l / magnitude for l in lateral]
-            for i in range(3):
-                self.posicao[i] -= lateral[i] * self.velocidade
+            lateral = np.cross(self.direcao, self.cima)
+            lateral = lateral / np.linalg.norm(lateral)
+            self.posicao -= lateral * self.velocidade
         elif direcao == 'direita':
-            lateral = [
-                self.direcao[1]*self.cima[2] - self.direcao[2]*self.cima[1],
-                self.direcao[2]*self.cima[0] - self.direcao[0]*self.cima[2],
-                self.direcao[0]*self.cima[1] - self.direcao[1]*self.cima[0]
-            ]
-            magnitude = math.sqrt(sum([l ** 2 for l in lateral]))
-            if magnitude != 0:
-                lateral = [l / magnitude for l in lateral]
-            for i in range(3):
-                self.posicao[i] += lateral[i] * self.velocidade
+            lateral = np.cross(self.direcao, self.cima)
+            lateral = lateral / np.linalg.norm(lateral)
+            self.posicao += lateral * self.velocidade
         elif direcao == 'cima':
-            for i in range(3):
-                self.posicao[i] += self.cima[i] * self.velocidade
+            self.posicao += self.cima * self.velocidade
         elif direcao == 'baixo':
-            for i in range(3):
-                self.posicao[i] -= self.cima[i] * self.velocidade
-        self.atualizar_vetor_direcao()
+            self.posicao -= self.cima * self.velocidade
+        self.olhar_para = self.posicao + self.direcao
 
-    def rotacionar(self, eixo: str, angulo: float):
+    def rotacionar(self, eixo, angulo):
         if eixo == 'yaw':
             self.yaw += angulo * self.sensibilidade
         elif eixo == 'pitch':
             self.pitch += angulo * self.sensibilidade
-            # Limita o pitch para evitar gimbal lock
             if self.pitch > 89.0:
                 self.pitch = 89.0
             if self.pitch < -89.0:
                 self.pitch = -89.0
         self.atualizar_vetor_direcao()
 
-    def atualizar_velocidade(self, nova_velocidade: float):
-        self.velocidade = nova_velocidade
+    def obter_matriz_visao(self):
+        return self.look_at(self.posicao, self.olhar_para, self.cima)
+
+    def obter_matriz_projecao(self, largura_tela, altura_tela):
+        fov = 45.0
+        aspecto = largura_tela / altura_tela
+        near = 0.1
+        far = 1000.0
+        return self.perspective(fov, aspecto, near, far)
+
+    def look_at(self, eye, center, up):
+        f = center - eye
+        f = f / np.linalg.norm(f)
+        u = up / np.linalg.norm(up)
+        s = np.cross(f, u)
+        s = s / np.linalg.norm(s)
+        u = np.cross(s, f)
+
+        matriz = np.identity(4, dtype=np.float32)
+        matriz[0][0] = s[0]
+        matriz[1][0] = s[1]
+        matriz[2][0] = s[2]
+        matriz[0][1] = u[0]
+        matriz[1][1] = u[1]
+        matriz[2][1] = u[2]
+        matriz[0][2] = -f[0]
+        matriz[1][2] = -f[1]
+        matriz[2][2] = -f[2]
+        matriz[3][0] = -np.dot(s, eye)
+        matriz[3][1] = -np.dot(u, eye)
+        matriz[3][2] = np.dot(f, eye)
+        return matriz
+
+    def perspective(self, fov, aspecto, near, far):
+        fov_rad = math.radians(fov)
+        f = 1.0 / math.tan(fov_rad / 2.0)
+        matriz = np.zeros((4, 4), dtype=np.float32)
+        matriz[0][0] = f / aspecto
+        matriz[1][1] = f
+        matriz[2][2] = (far + near) / (near - far)
+        matriz[2][3] = -1.0
+        matriz[3][2] = (2.0 * far * near) / (near - far)
+        return matriz

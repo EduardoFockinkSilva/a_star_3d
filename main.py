@@ -5,7 +5,7 @@ from renderizador3d import Renderizador3D
 from typing import List, Tuple
 import time
 
-dimensao = 20
+dimensao = 25
 
 def main():
     print("[Main] Iniciando o programa")
@@ -14,7 +14,7 @@ def main():
     fim = (dimensao -1, dimensao -1, dimensao -1)
 
     grid = Grid(dimensoes=dimensoes, inicio=inicio, fim=fim)
-    permitir_diagonais = True  # Ativa o movimento diagonal
+    permitir_diagonais = False  # Ativa o movimento diagonal
     a_estrela = AEstrela(grid=grid, permitir_diagonais=permitir_diagonais)
     print("[Main] Iniciando busca com A*")
 
