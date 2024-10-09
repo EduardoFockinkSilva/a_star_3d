@@ -7,8 +7,8 @@ class Camera:
         self.posicao = posicao      # Posição da câmera [x, y, z]
         self.olhar_para = olhar_para  # Ponto para onde a câmera está olhando [x, y, z]
         self.cima = cima            # Vetor "up" da câmera [x, y, z]
-        self.velocidade = 0.5       # Velocidade de movimento da câmera
-        self.sensibilidade = 1.0    # Sensibilidade da rotação
+        self.velocidade = 0.3       # Velocidade de movimento da câmera
+        self.sensibilidade = 1.5    # Sensibilidade da rotação
         self.yaw = -90.0            # Rotação em torno do eixo Y
         self.pitch = 0.0            # Rotação em torno do eixo X
         self.atualizar_vetor_direcao()

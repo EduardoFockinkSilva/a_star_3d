@@ -135,7 +135,7 @@ class Renderizador3D:
         glEnd()
 
     def desenhar_obstaculos(self):
-        glColor4f(0.6, 0.0, 0.0, 0.4)  # Vermelho semi-transparente para os obstáculos
+        glColor4f(0.6, 0.0, 0.0, 0.6)  # Vermelho semi-transparente para os obstáculos
         for posicao in self.grid.obstaculos:
             glPushMatrix()
             x, y, z = posicao
