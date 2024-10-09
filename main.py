@@ -14,7 +14,8 @@ def main():
     fim = (dimensao -1, dimensao -1, dimensao -1)
 
     grid = Grid(dimensoes=dimensoes, inicio=inicio, fim=fim)
-    a_estrela = AEstrela(grid=grid)
+    permitir_diagonais = True  # Ativa o movimento diagonal
+    a_estrela = AEstrela(grid=grid, permitir_diagonais=permitir_diagonais)
     print("[Main] Iniciando busca com A*")
 
     tempo_inicio = time.time()

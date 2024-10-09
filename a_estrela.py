@@ -1,20 +1,26 @@
 # a_estrela.py
 from typing import List, Tuple, Set
 import heapq
+import math
 from no import No
 from grid import Grid
 
 class AEstrela:
-    def __init__(self, grid: Grid):
+    def __init__(self, grid: Grid, permitir_diagonais: bool = False):
         self.grid = grid
+        self.permitir_diagonais = permitir_diagonais
         self.nos_expandidos: Set[Tuple[int, int, int]] = set()  # Para armazenar os nós visitados
         self.custo_total: float = 0.0  # Custo total do caminho encontrado
 
     def heuristica(self, posicao_atual: Tuple[int, int, int], posicao_fim: Tuple[int, int, int]) -> float:
-        # Distância Manhattan
         x1, y1, z1 = posicao_atual
         x2, y2, z2 = posicao_fim
-        return abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
+        if self.permitir_diagonais:
+            # Distância Chebyshev
+            return max(abs(x1 - x2), abs(y1 - y2), abs(z1 - z2))
+        else:
+            # Distância Manhattan
+            return abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
 
     def obter_vizinhos(self, no_atual: No) -> List[No]:
         vizinhos = []
@@ -22,6 +28,16 @@ class AEstrela:
         movimentos = [(-1, 0, 0), (1, 0, 0),
                       (0, -1, 0), (0, 1, 0),
                       (0, 0, -1), (0, 0, 1)]
+        if self.permitir_diagonais:
+            movimentos_diagonais = [
+                (-1, -1, 0), (-1, 1, 0), (1, -1, 0), (1, 1, 0),
+                (-1, 0, -1), (-1, 0, 1), (1, 0, -1), (1, 0, 1),
+                (0, -1, -1), (0, -1, 1), (0, 1, -1), (0, 1, 1),
+                (-1, -1, -1), (-1, -1, 1), (-1, 1, -1), (-1, 1, 1),
+                (1, -1, -1), (1, -1, 1), (1, 1, -1), (1, 1, 1)
+            ]
+            movimentos.extend(movimentos_diagonais)
+
         for dx, dy, dz in movimentos:
             nx, ny, nz = x + dx, y + dy, z + dz
             if (0 <= nx < self.grid.dimensoes[0] and
@@ -30,6 +46,16 @@ class AEstrela:
                 if (nx, ny, nz) not in self.grid.obstaculos:
                     vizinhos.append(No(posicao=(nx, ny, nz)))
         return vizinhos
+
+    def custo_movimento(self, posicao_atual: Tuple[int, int, int], posicao_vizinho: Tuple[int, int, int]) -> float:
+        dx = abs(posicao_atual[0] - posicao_vizinho[0])
+        dy = abs(posicao_atual[1] - posicao_vizinho[1])
+        dz = abs(posicao_atual[2] - posicao_vizinho[2])
+        if self.permitir_diagonais:
+            # Custo Euclidiano para movimentos diagonais
+            return math.sqrt(dx * dx + dy * dy + dz * dz)
+        else:
+            return 1  # Custo de 1 para movimentos ortogonais
 
     def buscar(self) -> List[Tuple[int, int, int]]:
         print("[AEstrela] Iniciando busca...")
@@ -55,7 +81,8 @@ class AEstrela:
                 if vizinho.posicao in conjunto_fechado:
                     continue
 
-                vizinho.g = no_atual.g + 1  # Custo para mover para um vizinho
+                custo_mov = self.custo_movimento(no_atual.posicao, vizinho.posicao)
+                vizinho.g = no_atual.g + custo_mov
                 vizinho.h = self.heuristica(vizinho.posicao, no_fim.posicao)
                 vizinho.f = vizinho.g + vizinho.h
                 vizinho.pai = no_atual
