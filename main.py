@@ -5,11 +5,13 @@ from renderizador3d import Renderizador3D
 from typing import List, Tuple
 import time
 
+dimensao = 20
+
 def main():
     print("[Main] Iniciando o programa")
-    dimensoes = (20, 20, 20)
+    dimensoes = (dimensao, dimensao, dimensao)
     inicio = (0, 0, 0)
-    fim = (19, 19, 19)
+    fim = (dimensao -1, dimensao -1, dimensao -1)
 
     grid = Grid(dimensoes=dimensoes, inicio=inicio, fim=fim)
     a_estrela = AEstrela(grid=grid)
