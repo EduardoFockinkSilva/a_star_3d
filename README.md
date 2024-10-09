@@ -12,8 +12,8 @@ Este projeto implementa o algoritmo A* em um grid 3D, permitindo visualizar o ca
 
 ### 1. Clone o repositório
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
-cd seu-repositorio
+git clone https://github.com/seu-usuario/a_star_3d.git
+cd a_star_3d
 ```
 
 ### 2. Crie um ambiente virtual
