@@ -5,7 +5,7 @@ from renderizador3d import Renderizador3D
 from typing import List, Tuple
 import time
 
-dimensao = 25
+dimensao = 60
 
 def main():
     print("[Main] Iniciando o programa")
