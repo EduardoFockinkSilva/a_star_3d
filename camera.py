@@ -7,35 +7,34 @@ class Camera:
         self.posicao = posicao      # Posição da câmera [x, y, z]
         self.olhar_para = olhar_para  # Ponto para onde a câmera está olhando [x, y, z]
         self.cima = cima            # Vetor "up" da câmera [x, y, z]
-        self.velocidade = 0.5       # Velocidade de movimento da câmera
+        self.velocidade = 0.3       # Velocidade de movimento da câmera
+        self.sensibilidade = 0.4   # Sensibilidade da rotação
+        self.yaw = 0.0              # Rotação em torno do eixo Y
+        self.pitch = 0.0            # Rotação em torno do eixo X
         self.atualizar_vetor_direcao()
-        print(f"[Camera] Inicializada com posição {self.posicao} e olhando para {self.olhar_para}")
 
     def atualizar_vetor_direcao(self):
-        self.direcao = [
-            self.olhar_para[0] - self.posicao[0],
-            self.olhar_para[1] - self.posicao[1],
-            self.olhar_para[2] - self.posicao[2]
+        # Calcula o vetor direção baseado nos ângulos yaw e pitch
+        direcao_x = math.cos(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
+        direcao_y = math.sin(math.radians(self.pitch))
+        direcao_z = math.sin(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
+        self.direcao = [direcao_x, direcao_y, direcao_z]
+        # Atualiza o ponto para onde a câmera está olhando
+        self.olhar_para = [
+            self.posicao[0] + self.direcao[0],
+            self.posicao[1] + self.direcao[1],
+            self.posicao[2] + self.direcao[2]
         ]
-        magnitude = math.sqrt(sum([d ** 2 for d in self.direcao]))
-        if magnitude != 0:
-            self.direcao = [d / magnitude for d in self.direcao]
-        else:
-            self.direcao = [0.0, 0.0, -1.0]
-        print(f"[Camera] Vetor direção atualizado: {self.direcao}")
 
     def mover(self, direcao: str):
-        print(f"[Camera] Movendo câmera para {direcao}")
         if direcao == 'frente':
             for i in range(3):
                 self.posicao[i] += self.direcao[i] * self.velocidade
-                self.olhar_para[i] += self.direcao[i] * self.velocidade
         elif direcao == 'tras':
             for i in range(3):
                 self.posicao[i] -= self.direcao[i] * self.velocidade
-                self.olhar_para[i] -= self.direcao[i] * self.velocidade
         elif direcao == 'esquerda':
-            # Movimento lateral (produto vetorial entre direção e vetor cima)
+            # Produto vetorial entre vetor direção e vetor cima
             lateral = [
                 self.cima[1]*self.direcao[2] - self.cima[2]*self.direcao[1],
                 self.cima[2]*self.direcao[0] - self.cima[0]*self.direcao[2],
@@ -46,7 +45,6 @@ class Camera:
                 lateral = [l / magnitude for l in lateral]
             for i in range(3):
                 self.posicao[i] -= lateral[i] * self.velocidade
-                self.olhar_para[i] -= lateral[i] * self.velocidade
         elif direcao == 'direita':
             lateral = [
                 self.cima[1]*self.direcao[2] - self.cima[2]*self.direcao[1],
@@ -58,18 +56,25 @@ class Camera:
                 lateral = [l / magnitude for l in lateral]
             for i in range(3):
                 self.posicao[i] += lateral[i] * self.velocidade
-                self.olhar_para[i] += lateral[i] * self.velocidade
         elif direcao == 'cima':
             for i in range(3):
                 self.posicao[i] += self.cima[i] * self.velocidade
-                self.olhar_para[i] += self.cima[i] * self.velocidade
         elif direcao == 'baixo':
             for i in range(3):
                 self.posicao[i] -= self.cima[i] * self.velocidade
-                self.olhar_para[i] -= self.cima[i] * self.velocidade
         self.atualizar_vetor_direcao()
-        print(f"[Camera] Posição atual: {self.posicao}, Olhando para: {self.olhar_para}")
+
+    def rotacionar(self, eixo: str, angulo: float):
+        if eixo == 'yaw':
+            self.yaw += angulo * self.sensibilidade
+        elif eixo == 'pitch':
+            self.pitch += angulo * self.sensibilidade
+            # Limita o pitch para evitar gimbal lock
+            if self.pitch > 89.0:
+                self.pitch = 89.0
+            if self.pitch < -89.0:
+                self.pitch = -89.0
+        self.atualizar_vetor_direcao()
 
     def atualizar_velocidade(self, nova_velocidade: float):
         self.velocidade = nova_velocidade
-        print(f"[Camera] Velocidade atualizada para {self.velocidade}")

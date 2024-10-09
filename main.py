@@ -14,7 +14,7 @@ def main():
         x = random.randint(0, dimensoes[0] - 1)
         y = random.randint(0, dimensoes[1] - 1)
         z = random.randint(0, dimensoes[2] - 1)
-        #obstaculos.append((x, y, z))
+        obstaculos.append((x, y, z))
     inicio = (0, 0, 0)
     fim = (9, 9, 9)
 
