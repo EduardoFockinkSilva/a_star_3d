@@ -1,5 +1,5 @@
 # a_estrela.py
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set
 import heapq
 from no import No
 from grid import Grid
@@ -8,12 +8,13 @@ class AEstrela:
     def __init__(self, grid: Grid):
         self.grid = grid
         self.nos_expandidos: Set[Tuple[int, int, int]] = set()  # Para armazenar os nós visitados
+        self.custo_total: float = 0.0  # Custo total do caminho encontrado
 
     def heuristica(self, posicao_atual: Tuple[int, int, int], posicao_fim: Tuple[int, int, int]) -> float:
-        # Distância Euclidiana
+        # Distância Manhattan
         x1, y1, z1 = posicao_atual
         x2, y2, z2 = posicao_fim
-        return ((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2) ** 0.5
+        return abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
 
     def obter_vizinhos(self, no_atual: No) -> List[No]:
         vizinhos = []
@@ -46,6 +47,7 @@ class AEstrela:
 
             if no_atual == no_fim:
                 print("[AEstrela] Caminho encontrado!")
+                self.custo_total = no_atual.g
                 return self.reconstruir_caminho(no_atual)
 
             vizinhos = self.obter_vizinhos(no_atual)
@@ -53,7 +55,7 @@ class AEstrela:
                 if vizinho.posicao in conjunto_fechado:
                     continue
 
-                vizinho.g = no_atual.g + 1
+                vizinho.g = no_atual.g + 1  # Custo para mover para um vizinho
                 vizinho.h = self.heuristica(vizinho.posicao, no_fim.posicao)
                 vizinho.f = vizinho.g + vizinho.h
                 vizinho.pai = no_atual

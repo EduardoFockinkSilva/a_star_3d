@@ -7,7 +7,6 @@ from typing import List, Tuple, Set
 from grid import Grid
 from camera import Camera
 from controlador_entrada import ControladorEntrada
-from a_estrela import AEstrela
 
 class Renderizador3D:
     def __init__(self, grid: Grid, caminho: List[Tuple[int, int, int]], nos_expandidos: Set[Tuple[int, int, int]]):
@@ -18,8 +17,10 @@ class Renderizador3D:
         self.altura_tela = 600
         self.inicializar_pygame()
         self.inicializar_opengl()
+        # Ajuste da posição inicial da câmera
+        distancia_inicial = max(self.grid.dimensoes) * 2
         self.camera = Camera(
-            posicao=[self.grid.dimensoes[0] / 2, self.grid.dimensoes[1] / 2, -max(self.grid.dimensoes) * 2],
+            posicao=[self.grid.dimensoes[0] / 2, self.grid.dimensoes[1] / 2, distancia_inicial],
             olhar_para=[self.grid.dimensoes[0] / 2, self.grid.dimensoes[1] / 2, self.grid.dimensoes[2] / 2],
             cima=[0, 1, 0]
         )
@@ -40,7 +41,7 @@ class Renderizador3D:
     def definir_parametros_camera(self):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(45, (self.largura_tela / self.altura_tela), 0.1, 100.0)
+        gluPerspective(45, (self.largura_tela / self.altura_tela), 0.1, 1000.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
@@ -95,7 +96,7 @@ class Renderizador3D:
         glPushMatrix()
         x, y, z = posicao
         glTranslatef(x + 0.5, y + 0.5, z + 0.5)
-        glScalef(0.2, 0.2, 0.2)
+        glScalef(0.5, 0.5, 0.5)
         self.desenhar_cubo()
         glPopMatrix()
 

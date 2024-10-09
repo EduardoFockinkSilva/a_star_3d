@@ -22,9 +22,9 @@ class ControladorEntrada:
             self.camera.mover('frente')
         if teclas[pygame.K_s]:
             self.camera.mover('tras')
-        if teclas[pygame.K_d]:
-            self.camera.mover('esquerda')
         if teclas[pygame.K_a]:
+            self.camera.mover('esquerda')
+        if teclas[pygame.K_d]:
             self.camera.mover('direita')
         if teclas[pygame.K_q]:
             self.camera.mover('cima')
