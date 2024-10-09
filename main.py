@@ -1,7 +1,7 @@
 # main.py
 from grid import Grid
 from a_estrela import AEstrela
-from renderizador3d import Renderizador3D
+from visualizacao.renderizador3d import Renderizador3D
 from typing import List, Tuple
 import time
 

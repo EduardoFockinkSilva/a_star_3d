@@ -1,6 +1,6 @@
 # controlador_entrada.py
 import pygame
-from camera import Camera
+from visualizacao.camera import Camera
 
 class ControladorEntrada:
     def __init__(self, camera: Camera):

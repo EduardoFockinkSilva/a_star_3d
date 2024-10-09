@@ -4,10 +4,10 @@ from pygame.locals import *
 from OpenGL.GL import *
 from typing import List, Tuple, Set
 from grid import Grid
-from camera import Camera
+from visualizacao.camera import Camera
 from controlador_entrada import ControladorEntrada
 import numpy as np
-from vertices import vertices_cubo, indices_cubo
+from visualizacao.vertices import vertices_cubo, indices_cubo
 
 class Renderizador3D:
     # Definição das cores e opacidades
@@ -171,8 +171,8 @@ class Renderizador3D:
         return shader_src
 
     def compilar_shaders(self):
-        vertex_shader_src = self.carregar_shader('vertex_shader.glsl')
-        fragment_shader_src = self.carregar_shader('fragment_shader.glsl')
+        vertex_shader_src = self.carregar_shader('visualizacao/vertex_shader.glsl')
+        fragment_shader_src = self.carregar_shader('visualizacao/fragment_shader.glsl')
 
         # Compilar Vertex Shader
         vertex_shader = glCreateShader(GL_VERTEX_SHADER)
